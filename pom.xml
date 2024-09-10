@@ -12,6 +12,30 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <restassured.ver>5.5.0</restassured.ver>
+        <commons.codec.ver>1.17.1</commons.codec.ver>
+        <testng.ver>7.10.2</testng.ver>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>${restassured.ver}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>${commons.codec.ver}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>${testng.ver}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+
 
 </project>
