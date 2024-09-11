@@ -16,6 +16,7 @@
         <commons.codec.ver>1.17.1</commons.codec.ver>
         <testng.ver>7.10.2</testng.ver>
         <lombok.ver>1.18.34</lombok.ver>
+        <jackson.ver>2.17.2</jackson.ver>
     </properties>
 
     <dependencies>
@@ -40,6 +41,11 @@
             <artifactId>lombok</artifactId>
             <version>${lombok.ver}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.ver}</version>
         </dependency>
     </dependencies>
 
