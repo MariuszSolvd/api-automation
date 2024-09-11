@@ -33,13 +33,13 @@ public class UserTests {
                 .when()
                 .post()
                 .then()
+                .statusCode(201)
                 .body("email", equalTo(createUser.getEmail()))
                 .body("name", equalTo(createUser.getName()))
                 .body("status", equalTo(createUser.getStatus().getStatus()))
                 .body("gender", equalTo(createUser.getGender().getGender()))
                 .header("Content-Type", equalTo ("application/json; charset=utf-8"))
-                .header("Server", equalTo("cloudflare"))
-                .statusCode(201);
+                .header("Server", equalTo("cloudflare"));
     }
 
     @Test
@@ -60,6 +60,30 @@ public class UserTests {
                 .body("status", equalTo(user.status().getStatus()))
                 .header("Content-Type", equalTo ("application/json; charset=utf-8"))
                 .header("Server", equalTo("cloudflare"));
+    }
+
+    @Test
+    public void updatedUser() {
+        //Adding user
+        User user = UserCreator.saveUser();
+
+        CreateUser newUser = UserCreator.createUser();
+
+        given()
+                .auth().oauth2(ConfigLoader.getProperty("token"))
+                .contentType(ContentType.JSON)
+                .body(newUser)
+                .when()
+                .put("/" + user.id())
+                .then()
+                .statusCode(200)
+                .body("email", equalTo(newUser.getEmail()))
+                .body("name", equalTo(newUser.getName()))
+                .body("status", equalTo(newUser.getStatus().getStatus()))
+                .body("gender", equalTo(newUser.getGender().getGender()))
+                .header("Content-Type", equalTo ("application/json; charset=utf-8"))
+                .header("Server", equalTo("cloudflare"));
+
     }
 
 }
