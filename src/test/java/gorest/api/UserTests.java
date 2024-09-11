@@ -44,20 +44,8 @@ public class UserTests {
 
     @Test
     public void getUserById() {
-        //Creating random user
-        CreateUser createUser = UserCreator.createUser();
-
         //Adding createUser
-        User user = given()
-                .auth().oauth2(ConfigLoader.getProperty("token"))
-                .contentType(ContentType.JSON)
-                .body(createUser)
-                .when()
-                .post()
-                .then()
-                .statusCode(201)
-                .extract()
-                .as(User.class);
+        User user = UserCreator.saveUser();
 
         //Getting added user along with assertion
         given()
