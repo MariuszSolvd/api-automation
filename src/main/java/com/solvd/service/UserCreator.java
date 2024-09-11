@@ -3,9 +3,15 @@ package com.solvd.service;
 import com.solvd.dto.CreateUser;
 import com.solvd.model.Gender;
 import com.solvd.model.Status;
+import com.solvd.model.User;
+import com.solvd.utilis.ConfigLoader;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 
 import java.util.List;
 import java.util.Random;
+
+import static io.restassured.RestAssured.given;
 
 public class UserCreator {
     private static final List<String> NAMES = List.of("James", "Michael", "Robert", "John", "David", "William",
@@ -38,5 +44,25 @@ public class UserCreator {
                 .email(email)
                 .gender(gender)
                 .status(status).build();
+    }
+
+    public static User saveUser() {
+        RestAssured.baseURI = ConfigLoader.getProperty("url");
+
+        //Creating random user
+        CreateUser createUser = UserCreator.createUser();
+
+        //Adding createUser
+
+        return given()
+                .auth().oauth2(ConfigLoader.getProperty("token"))
+                .contentType(ContentType.JSON)
+                .body(createUser)
+                .when()
+                .post()
+                .then()
+                .statusCode(201)
+                .extract()
+                .as(User.class);
     }
 }
