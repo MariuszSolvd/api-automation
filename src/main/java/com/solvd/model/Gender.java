@@ -1,5 +1,6 @@
 package com.solvd.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -7,7 +8,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum Gender {
 
+    @JsonProperty("female")
     FEMALE("female"),
+    @JsonProperty("male")
     MALE("male");
 
     private final String gender;
