@@ -1,11 +1,11 @@
 package gorest.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.solvd.dto.CreateUser;
 import com.solvd.service.UserCreator;
 import com.solvd.utilis.ConfigLoader;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 
@@ -14,13 +14,15 @@ import static org.hamcrest.Matchers.equalTo;
 
 public class UserTests {
 
+    @BeforeTest
+    public void setUrl() {
+        RestAssured.baseURI = ConfigLoader.getProperty("url");
+    }
+
     @Test
-    public void createUser() throws JsonProcessingException {
+    public void createUser() {
         //Creating random user to add using HTTP POST request
         CreateUser createUser = UserCreator.createUser();
-
-        //TODO: Maybe it will be better to move it to @BeforeTest
-        RestAssured.baseURI = ConfigLoader.getProperty("url");
 
         //Sending request, and assert body, status, and header
         given()
