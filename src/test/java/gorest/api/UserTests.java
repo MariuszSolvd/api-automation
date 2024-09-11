@@ -83,7 +83,20 @@ public class UserTests {
                 .body("gender", equalTo(newUser.getGender().getGender()))
                 .header("Content-Type", equalTo ("application/json; charset=utf-8"))
                 .header("Server", equalTo("cloudflare"));
+    }
 
+    @Test
+    public void deleteUser() {
+        //Adding user
+        User user = UserCreator.saveUser();
+
+        //Deleting user
+        given()
+                .auth().oauth2(ConfigLoader.getProperty("token"))
+                .delete("/" + user.id())
+                .then()
+                .statusCode(204)
+                .header("Server", equalTo("cloudflare"));
     }
 
 }
