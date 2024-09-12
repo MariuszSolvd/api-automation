@@ -1,4 +1,4 @@
-package gorest.api;
+package com.solvd.gorest.api;
 
 import com.solvd.dto.UserDTO;
 import com.solvd.model.Status;
