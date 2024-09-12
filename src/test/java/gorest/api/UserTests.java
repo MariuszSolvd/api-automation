@@ -101,6 +101,7 @@ public class UserTests {
 
     @Test
     public void getAllUsers() {
+        //Get Users and check if all fields are not null, along with status code, and headers
         given()
                 .auth().oauth2(ConfigLoader.getProperty("token"))
                 .get()
@@ -114,10 +115,13 @@ public class UserTests {
     }
 
     @Test
-    public void tryToCreateUserWithoutEmail() {
+    public void createUserWithoutEmail() {
+        //Creating random user
         CreateUser createUser = UserCreator.createUser();
+        //Set an email to null
         createUser.setEmail(null);
 
+        //Try to add the user with an empty email, and assert there will be an error
         given()
                 .auth().oauth2(ConfigLoader.getProperty("token"))
                 .contentType(ContentType.JSON)
@@ -127,6 +131,30 @@ public class UserTests {
                 .statusCode(422)
                 .body("[0].field", equalTo("email"))
                 .body("[0].message", equalTo("can't be blank"))
+                .header("Content-Type", equalTo ("application/json; charset=utf-8"))
+                .header("Server", equalTo("cloudflare"));
+    }
+
+    @Test
+    public void createUserWithExistingEmail() {
+        //Creating and adding first user
+        User user = UserCreator.saveUser();
+
+        //Create new user
+        CreateUser createUser = UserCreator.createUser();
+        //Set an existing email
+        createUser.setEmail(user.email());
+
+        //Assert that user will not be added
+        given()
+                .auth().oauth2(ConfigLoader.getProperty("token"))
+                .contentType(ContentType.JSON)
+                .body(createUser)
+                .post()
+                .then()
+                .statusCode(422)
+                .body("[0].field", equalTo("email"))
+                .body("[0].message", equalTo("has already been taken"))
                 .header("Content-Type", equalTo ("application/json; charset=utf-8"))
                 .header("Server", equalTo("cloudflare"));
     }
