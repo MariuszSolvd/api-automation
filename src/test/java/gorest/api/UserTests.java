@@ -1,6 +1,7 @@
 package gorest.api;
 
-import com.solvd.dto.CreateUser;
+import com.solvd.dto.UserDTO;
+import com.solvd.model.Status;
 import com.solvd.model.User;
 import com.solvd.service.UserCreator;
 import com.solvd.utilis.ConfigLoader;
@@ -23,21 +24,21 @@ public class UserTests {
     @Test
     public void createUser() {
         //Creating random user to add using HTTP POST request
-        CreateUser createUser = UserCreator.createUser();
+        UserDTO userDTO = UserCreator.createUser();
 
         //Sending request, and assert body, status, and header
         given()
                 .auth().oauth2(ConfigLoader.getProperty("token"))
                 .contentType(ContentType.JSON)
-                .body(createUser)
+                .body(userDTO)
                 .when()
                 .post()
                 .then()
                 .statusCode(201)
-                .body("email", equalTo(createUser.getEmail()))
-                .body("name", equalTo(createUser.getName()))
-                .body("status", equalTo(createUser.getStatus().getStatus()))
-                .body("gender", equalTo(createUser.getGender().getGender()))
+                .body("email", equalTo(userDTO.getEmail()))
+                .body("name", equalTo(userDTO.getName()))
+                .body("status", equalTo(userDTO.getStatus().getStatus()))
+                .body("gender", equalTo(userDTO.getGender().getGender()))
                 .header("Content-Type", equalTo ("application/json; charset=utf-8"))
                 .header("Server", equalTo("cloudflare"));
     }
@@ -68,7 +69,7 @@ public class UserTests {
         User user = UserCreator.saveUser();
 
         //Create new user to use its fields to replace current ones
-        CreateUser newUser = UserCreator.createUser();
+        UserDTO newUser = UserCreator.createUser();
 
         given()
                 .auth().oauth2(ConfigLoader.getProperty("token"))
@@ -118,15 +119,15 @@ public class UserTests {
     @Test
     public void createUserWithoutEmail() {
         //Creating random user
-        CreateUser createUser = UserCreator.createUser();
+        UserDTO userDTO = UserCreator.createUser();
         //Set an email to null
-        createUser.setEmail(null);
+        userDTO.setEmail(null);
 
         //Try to add the user with an empty email, and assert there will be an error
         given()
                 .auth().oauth2(ConfigLoader.getProperty("token"))
                 .contentType(ContentType.JSON)
-                .body(createUser)
+                .body(userDTO)
                 .post()
                 .then()
                 .statusCode(422)
@@ -142,15 +143,15 @@ public class UserTests {
         User user = UserCreator.saveUser();
 
         //Create new user
-        CreateUser createUser = UserCreator.createUser();
+        UserDTO userDTO = UserCreator.createUser();
         //Set an existing email
-        createUser.setEmail(user.email());
+        userDTO.setEmail(user.email());
 
         //Assert that user will not be added
         given()
                 .auth().oauth2(ConfigLoader.getProperty("token"))
                 .contentType(ContentType.JSON)
-                .body(createUser)
+                .body(userDTO)
                 .post()
                 .then()
                 .statusCode(422)
@@ -191,6 +192,40 @@ public class UserTests {
                 .then()
                 .statusCode(404)
                 .body("message", equalTo("Resource not found"))
+                .header("Content-Type", equalTo ("application/json; charset=utf-8"))
+                .header("Server", equalTo("cloudflare"));
+    }
+
+    @Test
+    public void updateUserStatus() {
+        //Adding new user
+        User user = UserCreator.saveUser();
+        //Declaring new status
+        Status newStatus;
+        if (user.status().getStatus().equals("active")) {
+            newStatus = Status.INACTIVE;
+        } else {
+            newStatus = Status.ACTIVE;
+        }
+
+        UserDTO userDTO = UserDTO.builder().name(user.name())
+                .email(user.email())
+                .gender(user.gender())
+                .status(newStatus)
+                .build();
+
+        //Change status
+        given()
+                .auth().oauth2(ConfigLoader.getProperty("token"))
+                .contentType(ContentType.JSON)
+                .body(userDTO)
+                .put("/" + user.id())
+                .then()
+                .statusCode(200)
+                .body("email", equalTo(user.email()))
+                .body("name", equalTo(user.name()))
+                .body("status", equalTo(newStatus.getStatus()))
+                .body("gender", equalTo(user.gender().getGender()))
                 .header("Content-Type", equalTo ("application/json; charset=utf-8"))
                 .header("Server", equalTo("cloudflare"));
     }
