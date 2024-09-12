@@ -67,6 +67,7 @@ public class UserTests {
         //Adding user
         User user = UserCreator.saveUser();
 
+        //Create new user to use its fields to replace current ones
         CreateUser newUser = UserCreator.createUser();
 
         given()
@@ -155,6 +156,18 @@ public class UserTests {
                 .statusCode(422)
                 .body("[0].field", equalTo("email"))
                 .body("[0].message", equalTo("has already been taken"))
+                .header("Content-Type", equalTo ("application/json; charset=utf-8"))
+                .header("Server", equalTo("cloudflare"));
+    }
+
+    @Test
+    public void deleteUserWithNonExistingID() {
+        given()
+                .auth().oauth2(ConfigLoader.getProperty("token"))
+                .delete("/99999")
+                .then()
+                .statusCode(404)
+                .body("message", equalTo("Resource not found"))
                 .header("Content-Type", equalTo ("application/json; charset=utf-8"))
                 .header("Server", equalTo("cloudflare"));
     }
