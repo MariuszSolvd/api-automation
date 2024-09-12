@@ -10,7 +10,7 @@ import lombok.Data;
 public class CreateUser {
 
     private final String name;
-    private final String email;
+    private String email;
     private final Gender gender;
     private final Status status;
 }
