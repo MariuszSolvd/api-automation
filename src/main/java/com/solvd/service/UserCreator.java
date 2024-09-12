@@ -1,6 +1,6 @@
 package com.solvd.service;
 
-import com.solvd.dto.CreateUser;
+import com.solvd.dto.UserDTO;
 import com.solvd.model.Gender;
 import com.solvd.model.Status;
 import com.solvd.model.User;
@@ -24,7 +24,7 @@ public class UserCreator {
             "hushmail.com", "mailfance.com", "tutanota.com", "thexyz.com", "runbox.com");
 
 
-    public static CreateUser createUser() {
+    public static UserDTO createUser() {
         Random random = new Random();
         //Creating name using random name and lastname from the list
         String name = NAMES.get(random.nextInt(NAMES.size())) + " " + LASTNAMES.get(random.nextInt(LASTNAMES.size()));
@@ -40,7 +40,7 @@ public class UserCreator {
         Status status = Status.values()[random.nextInt(Status.values().length)];
 
         //Creating instance of createUser with random generated data
-        return CreateUser.builder().name(name)
+        return UserDTO.builder().name(name)
                 .email(email)
                 .gender(gender)
                 .status(status).build();
@@ -50,14 +50,14 @@ public class UserCreator {
         RestAssured.baseURI = ConfigLoader.getProperty("url");
 
         //Creating random user
-        CreateUser createUser = UserCreator.createUser();
+        UserDTO userDTO = UserCreator.createUser();
 
         //Adding createUser
 
         return given()
                 .auth().oauth2(ConfigLoader.getProperty("token"))
                 .contentType(ContentType.JSON)
-                .body(createUser)
+                .body(userDTO)
                 .when()
                 .post()
                 .then()
