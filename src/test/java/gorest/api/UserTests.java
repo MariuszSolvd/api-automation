@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 
 public class UserTests {
 
@@ -96,6 +96,20 @@ public class UserTests {
                 .delete("/" + user.id())
                 .then()
                 .statusCode(204)
+                .header("Server", equalTo("cloudflare"));
+    }
+
+    @Test
+    public void getAllUsers() {
+        given()
+                .auth().oauth2(ConfigLoader.getProperty("token"))
+                .get()
+                .then()
+                .statusCode(200)
+                .body("id", everyItem(notNullValue()))
+                .body("name", everyItem(notNullValue())).body("email", everyItem(notNullValue()))
+                .body("gender", everyItem(notNullValue())).body("status", everyItem(notNullValue()))
+                .header("Content-Type", equalTo ("application/json; charset=utf-8"))
                 .header("Server", equalTo("cloudflare"));
     }
 
