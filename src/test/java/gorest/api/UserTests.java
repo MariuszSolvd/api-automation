@@ -172,4 +172,26 @@ public class UserTests {
                 .header("Server", equalTo("cloudflare"));
     }
 
+    @Test
+    public void tryGetDeletedUser() {
+        //Adding user
+        User user = UserCreator.saveUser();
+
+        //Deleting User
+        given()
+                .auth().oauth2(ConfigLoader.getProperty("token"))
+                .delete("/" + user.id())
+                .then()
+                .statusCode(204)
+                .header("Server", equalTo("cloudflare"));
+
+        given()
+                .auth().oauth2(ConfigLoader.getProperty("token"))
+                .get("/" + user.id())
+                .then()
+                .statusCode(404)
+                .body("message", equalTo("Resource not found"))
+                .header("Content-Type", equalTo ("application/json; charset=utf-8"))
+                .header("Server", equalTo("cloudflare"));
+    }
 }
