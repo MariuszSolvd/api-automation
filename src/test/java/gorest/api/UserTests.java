@@ -113,4 +113,22 @@ public class UserTests {
                 .header("Server", equalTo("cloudflare"));
     }
 
+    @Test
+    public void tryToCreateUserWithoutEmail() {
+        CreateUser createUser = UserCreator.createUser();
+        createUser.setEmail(null);
+
+        given()
+                .auth().oauth2(ConfigLoader.getProperty("token"))
+                .contentType(ContentType.JSON)
+                .body(createUser)
+                .post()
+                .then()
+                .statusCode(422)
+                .body("[0].field", equalTo("email"))
+                .body("[0].message", equalTo("can't be blank"))
+                .header("Content-Type", equalTo ("application/json; charset=utf-8"))
+                .header("Server", equalTo("cloudflare"));
+    }
+
 }
