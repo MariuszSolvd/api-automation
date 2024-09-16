@@ -1,11 +1,19 @@
 package com.solvd.service;
 
-import com.solvd.dto.CreateUser;
+import com.solvd.dto.UserDTO;
 import com.solvd.model.Gender;
 import com.solvd.model.Status;
+import com.solvd.model.User;
+import com.solvd.utilis.ConfigLoader;
+import com.solvd.utilis.QueryProvider;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 
 import java.util.List;
 import java.util.Random;
+
+import static io.restassured.RestAssured.given;
 
 public class UserCreator {
     private static final List<String> NAMES = List.of("James", "Michael", "Robert", "John", "David", "William",
@@ -18,7 +26,7 @@ public class UserCreator {
             "hushmail.com", "mailfance.com", "tutanota.com", "thexyz.com", "runbox.com");
 
 
-    public static CreateUser createUser() {
+    public static UserDTO createUser() {
         Random random = new Random();
         //Creating name using random name and lastname from the list
         String name = NAMES.get(random.nextInt(NAMES.size())) + " " + LASTNAMES.get(random.nextInt(LASTNAMES.size()));
@@ -34,9 +42,57 @@ public class UserCreator {
         Status status = Status.values()[random.nextInt(Status.values().length)];
 
         //Creating instance of createUser with random generated data
-        return CreateUser.builder().name(name)
+        return UserDTO.builder().name(name)
                 .email(email)
                 .gender(gender)
                 .status(status).build();
+    }
+
+    public static User saveUser() {
+        RestAssured.baseURI = ConfigLoader.getProperty("url");
+
+        //Creating random user
+        UserDTO userDTO = createUser();
+
+        //Adding createUser
+
+        return given()
+                .auth().oauth2(ConfigLoader.getProperty("token"))
+                .contentType(ContentType.JSON)
+                .body(userDTO)
+                .when()
+                .post()
+                .then()
+                .statusCode(201)
+                .extract()
+                .as(User.class);
+    }
+
+    public static User saveGraphQLUser() {
+        RestAssured.baseURI = ConfigLoader.getProperty("graphqlurl");
+
+        UserDTO userDTO = createUser();
+
+        String query = String.format(QueryProvider.CREATE_USER,
+                userDTO.getName(), userDTO.getEmail(), userDTO.getGender().getGender(),userDTO.getStatus().getStatus());
+
+        Response response = given()
+                .auth()
+                .oauth2(ConfigLoader.getProperty("token"))
+                .contentType(ContentType.JSON)
+                .body(query)
+                .when()
+                .post()
+                .then()
+                .statusCode(200)
+                .extract().response();
+
+        return new User(Long.valueOf(response.path("data.createUser.user.id").toString()),
+                response.path("data.createUser.user.name"),
+                response.path("data.createUser.user.email"),
+                Gender.valueOf(response.path("data.createUser.user.gender").toString().toUpperCase()),
+                Status.valueOf(response.path("data.createUser.user.status").toString().toUpperCase()));
+
+
     }
 }
