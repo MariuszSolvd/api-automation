@@ -31,7 +31,7 @@ public class UserTests {
         //noinspection LoggingSimilarMessage
         LOGGER.info("Creating random User");
         UserDTO userToAdd = UserCreator.createUser();
-        LOGGER.info(String.format("User created: %s", userToAdd));
+        LOGGER.info("User created: {}", userToAdd);
 
         LOGGER.info("Creating a query");
         String query = String.format(QueryProvider.CREATE_USER,

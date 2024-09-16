@@ -7,6 +7,8 @@ import com.solvd.service.UserCreator;
 import com.solvd.utilis.ConfigLoader;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -16,6 +18,8 @@ import static org.hamcrest.Matchers.*;
 
 public class UserTests {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(com.solvd.gorest.graphql.UserTests.class);
+
     @BeforeTest
     public void setUrl() {
         RestAssured.baseURI = ConfigLoader.getProperty("url");
@@ -23,10 +27,11 @@ public class UserTests {
 
     @Test
     public void createUser() {
-        //Creating random user to add using HTTP POST request
+        LOGGER.info("Creating random User");
         UserDTO userDTO = UserCreator.createUser();
+        LOGGER.info("User created: {}", userDTO);
 
-        //Sending request, and assert body, status, and header
+        LOGGER.info("Sending {} request", "Create User");
         given()
                 .auth().oauth2(ConfigLoader.getProperty("token"))
                 .contentType(ContentType.JSON)
@@ -41,14 +46,16 @@ public class UserTests {
                 .body("gender", equalTo(userDTO.getGender().getGender()))
                 .header("Content-Type", equalTo ("application/json; charset=utf-8"))
                 .header("Server", equalTo("cloudflare"));
+        LOGGER.info("Test Passed");
     }
 
     @Test
     public void getUserById() {
-        //Adding createUser
+        LOGGER.info("Creating random User");
         User user = UserCreator.saveUser();
+        LOGGER.info("User created: {}", user);
 
-        //Getting added user along with assertion
+        LOGGER.info("Sending {} request", "Get User by Id");
         given()
                 .auth().oauth2(ConfigLoader.getProperty("token"))
                 .contentType(ContentType.JSON)
@@ -63,16 +70,20 @@ public class UserTests {
                 .body("status", equalTo(user.status().getStatus()))
                 .header("Content-Type", equalTo ("application/json; charset=utf-8"))
                 .header("Server", equalTo("cloudflare"));
+        LOGGER.info("Test Passed");
     }
 
     @Test
     public void updatedUser() {
-        //Adding user
+        LOGGER.info("Creating random User");
         User user = UserCreator.saveUser();
+        LOGGER.info("User created: {}", user);
 
-        //Create new user to use its fields to replace current ones
+        LOGGER.info("Creating random User to use it's fields as an update request");
         UserDTO newUser = UserCreator.createUser();
+        LOGGER.info("User created: {}", newUser);
 
+        LOGGER.info("Sending {} request", "Update User");
         given()
                 .auth().oauth2(ConfigLoader.getProperty("token"))
                 .contentType(ContentType.JSON)
@@ -87,25 +98,28 @@ public class UserTests {
                 .body("gender", equalTo(newUser.getGender().getGender()))
                 .header("Content-Type", equalTo ("application/json; charset=utf-8"))
                 .header("Server", equalTo("cloudflare"));
+        LOGGER.info("Test Passed");
     }
 
     @Test
     public void deleteUser() {
-        //Adding user
+        LOGGER.info("Creating random User");
         User user = UserCreator.saveUser();
+        LOGGER.info("User created: {}", user);
 
-        //Deleting user
+        LOGGER.info("Sending {} request", "Delete User");
         given()
                 .auth().oauth2(ConfigLoader.getProperty("token"))
                 .delete("/" + user.id())
                 .then()
                 .statusCode(204)
                 .header("Server", equalTo("cloudflare"));
+        LOGGER.info("Test Passed");
     }
 
     @Test
     public void getAllUsers() {
-        //Get Users and check if all fields are not null, along with status code, and headers
+        LOGGER.info("Sending {} request", "Get All Users");
         given()
                 .auth().oauth2(ConfigLoader.getProperty("token"))
                 .get()
@@ -116,16 +130,19 @@ public class UserTests {
                 .body("gender", everyItem(notNullValue())).body("status", everyItem(notNullValue()))
                 .header("Content-Type", equalTo ("application/json; charset=utf-8"))
                 .header("Server", equalTo("cloudflare"));
+        LOGGER.info("Test Passed");
     }
 
     @Test
     public void createUserWithoutEmail() {
-        //Creating random user
+        LOGGER.info("Creating random User");
         UserDTO userDTO = UserCreator.createUser();
-        //Set an email to null
+        LOGGER.info("User created: {}", userDTO);
+
+        LOGGER.info("User email set to null");
         userDTO.setEmail(null);
 
-        //Try to add the user with an empty email, and assert there will be an error
+        LOGGER.info("Sending {} request", "Create User without Enail");
         given()
                 .auth().oauth2(ConfigLoader.getProperty("token"))
                 .contentType(ContentType.JSON)
@@ -137,19 +154,24 @@ public class UserTests {
                 .body("[0].message", equalTo("can't be blank"))
                 .header("Content-Type", equalTo ("application/json; charset=utf-8"))
                 .header("Server", equalTo("cloudflare"));
+        LOGGER.info("Test Passed");
     }
 
     @Test
     public void createUserWithExistingEmail() {
-        //Creating and adding first user
+        LOGGER.info("Creating random User");
         User user = UserCreator.saveUser();
+        LOGGER.info("User created: {}", user);
 
-        //Create new user
+        LOGGER.info("Creating new User to set an existing email");
         UserDTO userDTO = UserCreator.createUser();
-        //Set an existing email
-        userDTO.setEmail(user.email());
+        LOGGER.info("User created: {}", userDTO);
 
-        //Assert that user will not be added
+        LOGGER.info("Setting an existing email");
+        userDTO.setEmail(user.email());
+        LOGGER.info("Email in user set: {}", userDTO);
+
+        LOGGER.info("Sending {} request", "Create User with Exisiting Email");
         given()
                 .auth().oauth2(ConfigLoader.getProperty("token"))
                 .contentType(ContentType.JSON)
@@ -161,10 +183,12 @@ public class UserTests {
                 .body("[0].message", equalTo("has already been taken"))
                 .header("Content-Type", equalTo ("application/json; charset=utf-8"))
                 .header("Server", equalTo("cloudflare"));
+        LOGGER.info("Test Passed");
     }
 
     @Test
     public void deleteUserWithNonExistingID() {
+        LOGGER.info("Sending {} request", "Delete User with non exisiting id");
         given()
                 .auth().oauth2(ConfigLoader.getProperty("token"))
                 .delete("/99999")
@@ -173,14 +197,16 @@ public class UserTests {
                 .body("message", equalTo("Resource not found"))
                 .header("Content-Type", equalTo ("application/json; charset=utf-8"))
                 .header("Server", equalTo("cloudflare"));
+        LOGGER.info("Test Passed");
     }
 
     @Test
     public void tryGetDeletedUser() {
-        //Adding user
+        LOGGER.info("Creating random User");
         User user = UserCreator.saveUser();
+        LOGGER.info("User created: {}", user);
 
-        //Deleting User
+        LOGGER.info("Sending {} request", "Delete User");
         given()
                 .auth().oauth2(ConfigLoader.getProperty("token"))
                 .delete("/" + user.id())
@@ -188,6 +214,7 @@ public class UserTests {
                 .statusCode(204)
                 .header("Server", equalTo("cloudflare"));
 
+        LOGGER.info("Sending {} request", "try to get Deleted User");
         given()
                 .auth().oauth2(ConfigLoader.getProperty("token"))
                 .get("/" + user.id())
@@ -196,27 +223,33 @@ public class UserTests {
                 .body("message", equalTo("Resource not found"))
                 .header("Content-Type", equalTo ("application/json; charset=utf-8"))
                 .header("Server", equalTo("cloudflare"));
+        LOGGER.info("Test Passed");
     }
 
     @Test
     public void updateUserStatus() {
-        //Adding new user
+        LOGGER.info("Creating random User");
         User user = UserCreator.saveUser();
-        //Declaring new status
+        LOGGER.info("User created: {}", user);
+
+        LOGGER.info("Creating new Status");
         Status newStatus;
         if (user.status().getStatus().equals("active")) {
             newStatus = Status.INACTIVE;
         } else {
             newStatus = Status.ACTIVE;
         }
+        LOGGER.info("New Status Created: {}", newStatus.getStatus());
 
+        LOGGER.info("Creating new User with updated status");
         UserDTO userDTO = UserDTO.builder().name(user.name())
                 .email(user.email())
                 .gender(user.gender())
                 .status(newStatus)
                 .build();
+        LOGGER.info("Created User with new Status: {}", userDTO);
 
-        //Change status
+        LOGGER.info("Sending {} request", "updated Status in User");
         given()
                 .auth().oauth2(ConfigLoader.getProperty("token"))
                 .contentType(ContentType.JSON)
@@ -230,5 +263,6 @@ public class UserTests {
                 .body("gender", equalTo(user.gender().getGender()))
                 .header("Content-Type", equalTo ("application/json; charset=utf-8"))
                 .header("Server", equalTo("cloudflare"));
+        LOGGER.info("Test Passed");
     }
 }
