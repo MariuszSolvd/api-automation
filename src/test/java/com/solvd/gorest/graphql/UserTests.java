@@ -1,6 +1,8 @@
 package com.solvd.gorest.graphql;
 
 import com.solvd.dto.UserDTO;
+import com.solvd.model.Gender;
+import com.solvd.model.Status;
 import com.solvd.model.User;
 import com.solvd.service.UserCreator;
 import com.solvd.utilis.ConfigLoader;
@@ -65,5 +67,64 @@ public class UserTests {
                 .header("Server", equalTo("cloudflare"));
     }
 
+    @Test
+    public void updateStatusById() {
+        User user = UserCreator.saveGraphQLUser();
+
+        Status newStatus;
+        if (user.status().getStatus().equals("active")) {
+            newStatus = Status.INACTIVE;
+        } else {
+            newStatus = Status.ACTIVE;
+        }
+
+        String query = String.format(QueryProvider.UPDATE_STATUS,
+                user.id(), newStatus.getStatus());
+
+        given()
+                .auth().oauth2(ConfigLoader.getProperty("token"))
+                .contentType(ContentType.JSON)
+                .body(query)
+                .post()
+                .then()
+                .statusCode(200)
+                .body("data.updateUser.user.id", equalTo(user.id().intValue()))
+                .body("data.updateUser.user.name", equalTo(user.name()))
+                .body("data.updateUser.user.email", equalTo(user.email()))
+                .body("data.updateUser.user.gender", equalTo(user.gender().getGender()))
+                .body("data.updateUser.user.status", equalTo(newStatus.getStatus()))
+                .header("Content-Type", equalTo ("application/json; charset=utf-8"))
+                .header("Server", equalTo("cloudflare"));
+    }
+
+    @Test
+    public void updateGenderById() {
+        User user = UserCreator.saveGraphQLUser();
+
+        Gender newGender;
+        if (user.gender().getGender().equals("female")) {
+            newGender = Gender.MALE;
+        } else {
+            newGender = Gender.FEMALE;
+        }
+
+        String query = String.format(QueryProvider.UPDATE_GENDER,
+                user.id(), newGender.getGender());
+
+        given()
+                .auth().oauth2(ConfigLoader.getProperty("token"))
+                .contentType(ContentType.JSON)
+                .body(query)
+                .post()
+                .then()
+                .statusCode(200)
+                .body("data.updateUser.user.id", equalTo(user.id().intValue()))
+                .body("data.updateUser.user.name", equalTo(user.name()))
+                .body("data.updateUser.user.email", equalTo(user.email()))
+                .body("data.updateUser.user.gender", equalTo(newGender.getGender()))
+                .body("data.updateUser.user.status", equalTo(user.status().getStatus()))
+                .header("Content-Type", equalTo ("application/json; charset=utf-8"))
+                .header("Server", equalTo("cloudflare"));
+    }
 
 }
