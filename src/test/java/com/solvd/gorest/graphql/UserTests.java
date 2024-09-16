@@ -127,4 +127,26 @@ public class UserTests {
                 .header("Server", equalTo("cloudflare"));
     }
 
+    @Test
+    public void deleteById() {
+        User user = UserCreator.saveGraphQLUser();
+
+        String query = String.format(QueryProvider.DELETE_USER,
+                user.id());
+
+        given()
+                .auth().oauth2(ConfigLoader.getProperty("token"))
+                .contentType(ContentType.JSON)
+                .body(query)
+                .post()
+                .then()
+                .statusCode(200)
+                .body("data.deleteUser.user.id", equalTo(user.id().intValue()))
+                .body("data.deleteUser.user.name", equalTo(user.name()))
+                .body("data.deleteUser.user.email", equalTo(user.email()))
+                .body("data.deleteUser.user.gender", equalTo(user.gender().getGender()))
+                .body("data.deleteUser.user.status", equalTo(user.status().getStatus()))
+                .header("Server", equalTo("cloudflare"));
+    }
+
 }
