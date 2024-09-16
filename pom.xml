@@ -17,6 +17,8 @@
         <testng.ver>7.10.2</testng.ver>
         <lombok.ver>1.18.34</lombok.ver>
         <jackson.ver>2.17.2</jackson.ver>
+        <slf4j.ver>1.7.30</slf4j.ver>
+        <zeb.agent.ver>1.9.13</zeb.agent.ver>
     </properties>
 
     <dependencies>
@@ -47,8 +49,33 @@
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.ver}</version>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.36</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.17.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.17.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>2.17.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zebrunner</groupId>
+            <artifactId>agent-testng</artifactId>
+            <version>${zeb.agent.ver}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
-
 
 
 </project>
