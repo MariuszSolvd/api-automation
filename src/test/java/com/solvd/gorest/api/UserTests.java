@@ -56,8 +56,10 @@ public class UserTests {
                 .get("/" + user.id())
                 .then()
                 .statusCode(200)
-                .body("id", equalTo(user.id().intValue())).body("email", equalTo(user.email()))
-                .body("name", equalTo(user.name())).body("gender", equalTo(user.gender().getGender()))
+                .body("id", equalTo(user.id().intValue()))
+                .body("email", equalTo(user.email()))
+                .body("name", equalTo(user.name()))
+                .body("gender", equalTo(user.gender().getGender()))
                 .body("status", equalTo(user.status().getStatus()))
                 .header("Content-Type", equalTo ("application/json; charset=utf-8"))
                 .header("Server", equalTo("cloudflare"));
